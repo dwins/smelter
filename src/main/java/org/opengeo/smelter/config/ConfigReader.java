@@ -60,10 +60,4 @@ public class ConfigReader {
         }
         return results;
     }
-
-    public static void main(String[] args) throws Exception {
-        System.out.println(
-            parse(new BufferedReader(new FileReader(new File(args[0]))))
-        );
-    }
 }
