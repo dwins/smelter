@@ -8,7 +8,7 @@ import java.util.regex.*;
 public class ConfigReader {
     private static Pattern section = Pattern.compile("\\[(\\p{Print}+)\\]");
     private static Pattern property = 
-        Pattern.compile("(\\p{Graph}+?)\\p{Space}*=(\\.*)");
+        Pattern.compile("(\\p{Graph}+?)\\p{Space}*=(.*)");
     private static Pattern continuation = Pattern.compile("\\p{Space}+(.*)");
 
     public static Map<String,Map<String, String>> parse(BufferedReader r) 
@@ -34,7 +34,7 @@ public class ConfigReader {
                 currentProperty = new StringBuilder();
                 currentPropertyName = null;
                 currentSection = new HashMap<String, String>();
-                results.put(sectionMatcher.group(1), currentSection);
+                results.put(sectionMatcher.group(1).trim(), currentSection);
                 continue;
             }
 

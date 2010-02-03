@@ -11,6 +11,11 @@ public class FileFinder extends Finder {
     private File base;
 
     public FileFinder(File base) {
+        try {
+            System.out.println("Setting up file finder: " + base.getCanonicalPath());
+        } catch (Exception e) {
+            // don't recover??
+        }
         this.base = base;
     }
 
@@ -19,16 +24,19 @@ public class FileFinder extends Finder {
         this(new File(System.getProperty("user.dir")));
     }
 
+    @Override
     public ServerResource find(Request request, Response response) {
         String path = (String) request.getAttributes().get("path");
-        File f = new File(path);
+        File f = new File(base, path);
         try {
             if (f.getCanonicalPath().startsWith(base.getCanonicalPath())) {
                 return new FileResource(f);
             }
         } catch (IOException ioe) {
+            System.out.println(ioe);
             // not found, not a problem
         }
+
         return null;
     }
 }
