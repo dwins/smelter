@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 import org.restlet.Application;
 import org.restlet.Component;
@@ -28,6 +29,9 @@ public class Main extends Application {
     public synchronized Restlet createInboundRoot() {
         Router router = new Router(getContext());
         router.attach("/home", Home.class);
+        Map<String, LibraryRestlet> libraries =
+            new HashMap<String, LibraryRestlet>();
+
         for (Map.Entry<String, Map<String, String>> entry : config.entrySet()) {
             String name = entry.getKey();
             name = name.replaceFirst("\\..*?$", "");
@@ -42,12 +46,14 @@ public class Main extends Application {
                 route.getTemplate()
                     .getVariables()
                     .put("path", new Variable(Variable.TYPE_URI_PATH));
-                router.attach(
-                    "/" + name + ".js",
-                    new LibraryRestlet("/" + name, entry.getValue())
-                );
+                LibraryRestlet lib =
+                    new LibraryRestlet("/" + name, entry.getValue());
+                router.attach("/" + name + ".js", lib);
+                libraries.put(name + ".js", lib);
             }
         }
+
+        router.attach("/", new Home(libraries));
         return router;
     }
 
