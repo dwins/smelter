@@ -77,17 +77,17 @@ public class Main extends Application {
             );
         }
 
-        if (first != null) {
+        if (first != null && first.trim().length() > 0) {
             lib.getFirstFiles()
                 .addAll(Arrays.asList(first.trim().split("\\s+")));
         }
 
-        if (include != null) {
+        if (include != null && include.trim().length() > 0) {
             lib.getIncludeFiles()
                 .addAll(Arrays.asList(include.trim().split("\\s+")));
         }
 
-        if (exclude != null) {
+        if (exclude != null && exclude.trim().length() > 0) {
             lib.getExcludeFiles()
                 .addAll(Arrays.asList(exclude.trim().split("\\s+")));
         }

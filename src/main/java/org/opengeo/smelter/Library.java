@@ -49,100 +49,91 @@ public class Library {
         return this.exclude;
     }
 
-    public List<File> getSortedFiles() throws IOException {
-        List<String> inputPaths = new ArrayList<String>();
-        inputPaths.addAll(first);
-        inputPaths.addAll(include);
-        List<File> inputFiles = expandPaths(inputPaths);
+    public List<String> getSortedPaths() throws IOException {
+        Map<String, List<String>> dependencies = buildDependencyGraph();
+        List<String> unchecked = new ArrayList<String>();
+        List<String> toInclude = new ArrayList<String>();
+        unchecked.addAll(getFirstFiles());
+        unchecked.addAll(getIncludeFiles());
 
-        List<String> excludePaths = new ArrayList<String>();
-        excludePaths.addAll(exclude);
-        List<File> excludeFiles = expandPaths(excludePaths);
+        while (unchecked.size() > 0) {
+            String path = unchecked.get(0);
+            if (toInclude.contains(path)) {
+                unchecked.remove(0);
+                continue;
+            } else if (toInclude.containsAll(dependencies.get(path))) {
+                toInclude.add(path);
+                unchecked.remove(0);
+            } else {
+                unchecked.addAll(0, dependencies.get(path));
+            }
+        }
 
-        List<Node<File>> dependencies = extractDependencies(inputFiles);
-
-        return null;
+        return toInclude;
     }
 
     private List<File> expandPaths(List<String> paths) {
         List<File> files = new ArrayList<File>();
+
         for (String path : paths) {
             files.add(new File(root, path));
         }
+
         return files;
     }
 
-    private List<Node<File>> extractDependencies(List<File> sources) 
-    throws IOException {
-        List<Node<File>> queue = new ArrayList<Node<File>>();
-        Map<File, Node<File>> deps = new HashMap<File, Node<File>>();
+    private Map<String, List<String>> buildDependencyGraph() {
+        Map<String, List<String>> graph = new HashMap<String, List<String>>();
+        try {
+            List<File> sources = searchForSources(root);
 
-        for (File f : sources) {
-            queue.add(new Node<File>(f));
+            for (File f : sources) {
+                String path = f.getCanonicalPath()
+                    .substring(root.getCanonicalPath().length() + 1);
+                graph.put(path, findDependencies(f));
+            }
+        } catch (IOException ioe) {
+            System.out.println("Couldn't build dependency graph due to " + ioe);
         }
 
-        while (queue.size() > 0) {
-            scan(queue.remove(0), queue, deps);
-        }
-
-        return new ArrayList<Node<File>>(deps.values());
+        return graph;
     }
 
-    private Node<File> nodeFor(
-        File f,
-        List<Node<File>> queue,
-        Map<File, Node<File>> cache
-    ) {
-        if (cache.containsKey(f)) {
-            return cache.get(f);
-        } else {
-            Node<File> node = new Node<File>(f);
-            queue.add(node);
-            cache.put(f, node);
-            return node;
-        }
-    }
-
-    private void scan(
-        Node<File> source,
-        List<Node<File>> queue,
-        Map<File, Node<File>> cache
-    ) throws IOException {
-        Pattern include =
-            Pattern.compile("@(?:includes|requires)\\s+\\p{Graph}*");
-        BufferedReader reader =
-            new BufferedReader(new FileReader(source.payload));
+    private static List<String> findDependencies(File f) throws IOException {
+        BufferedReader reader = new BufferedReader(new FileReader(f));
         String line;
+        List<String> dependencies = new ArrayList<String>();
+        Pattern declaration = Pattern.compile(
+            "\\s*\\*\\s*@(?:requires|include)\\s+(\\p{Graph}*)\\s*"
+        );
+
         while ((line = reader.readLine()) != null) {
-            Matcher m = include.matcher(line);
-            if (m.matches()) {
-                source.dependencies.add(
-                    nodeFor(new File(root, m.group(1)), queue, cache)
-                );
+            Matcher matcher = declaration.matcher(line);
+            if (matcher.matches()) {
+                dependencies.add(matcher.group(1));
             }
         }
+
+        return dependencies;
     }
 
-    private class Node<A> {
-        public final A payload;
-        public final List<Node<A>> dependencies = new ArrayList<Node<A>>();
+    private List<File> searchForSources(File root) throws IOException {
+        List<File> results = new ArrayList<File>();
 
-        public Node(A payload) {
-            this.payload = payload;
-        }
-
-        @Override public boolean equals(Object that) {
-            if (that == null) return false;
-
-            if (that instanceof Node) {
-                Object payload = ((Node)that).payload;
-                return payload == null 
-                    ? this.payload == null 
-                    : payload.equals(this.payload);
+        for (File child : root.listFiles()) {
+            if (child.isDirectory()) {
+                results.addAll(searchForSources(child));
+            } else {
+                results.add(child);
             }
-
-            return false;
         }
+
+        return results;
+    }
+
+    private String relativePath(File f) {
+        return f.getAbsolutePath()
+            .substring(root.getAbsolutePath().length() + 1);
     }
 
     @Override public String toString() {

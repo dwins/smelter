@@ -1,5 +1,6 @@
 package org.opengeo.smelter;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.List;
@@ -75,7 +76,12 @@ public class LibraryRestlet extends Finder {
         private Representation getLoader() {
             Map<String, Object> configMap = new HashMap<String, Object>();
             List<String> includes = new ArrayList<String>();
-            includes.addAll(library.getIncludeFiles());
+
+            try {
+                includes.addAll(library.getSortedPaths());
+            } catch (IOException ioe) {
+                System.out.println(ioe);
+            }
 
             configMap.put("includes", includes);
             configMap.put("prefix", prefix);
