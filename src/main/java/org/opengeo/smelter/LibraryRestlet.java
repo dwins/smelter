@@ -18,7 +18,7 @@ import org.restlet.resource.ServerResource;
 
 public class LibraryRestlet extends Finder {
     private String prefix;
-    public Map<String, String> config;
+    public Library library;
 
     private static final Configuration freemarker;
 
@@ -30,9 +30,9 @@ public class LibraryRestlet extends Finder {
     static enum Mode { Minified, Loader }
     private Mode mode = Mode.Loader;
     
-    public LibraryRestlet(String prefix, Map<String, String> config) {
+    public LibraryRestlet(String prefix, Library library) {
         this.prefix = prefix;
-        this.config = config;
+        this.library = library;
     }
 
     public void setMode(Mode mode) {
@@ -75,9 +75,7 @@ public class LibraryRestlet extends Finder {
         private Representation getLoader() {
             Map<String, Object> configMap = new HashMap<String, Object>();
             List<String> includes = new ArrayList<String>();
-            includes.addAll(
-                Arrays.asList(config.get("first").trim().split("\\s+"))
-            );
+            includes.addAll(library.getIncludeFiles());
 
             configMap.put("includes", includes);
             configMap.put("prefix", prefix);

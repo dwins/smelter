@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -142,5 +143,11 @@ public class Library {
 
             return false;
         }
+    }
+
+    @Override public String toString() {
+        return Arrays.asList(new Object[] {
+            root, license, first, include, exclude
+        }).toString();
     }
 }

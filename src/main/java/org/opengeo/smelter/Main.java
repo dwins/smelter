@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import org.restlet.Application;
@@ -17,12 +18,11 @@ import org.opengeo.smelter.config.ConfigReader;
 
 public class Main extends Application {
     private File configFile;
-    private Map<String, Map<String, String>> config;
+    private Map<String, Library> config;
 
     public Main(File configFile) throws IOException {
         this.configFile = configFile;
-        this.config = 
-            ConfigReader.parse(new BufferedReader(new FileReader(configFile)));
+        this.config = extractLibraries(configFile);
     }
 
     @Override 
@@ -32,29 +32,82 @@ public class Main extends Application {
         Map<String, LibraryRestlet> libraries =
             new HashMap<String, LibraryRestlet>();
 
-        for (Map.Entry<String, Map<String, String>> entry : config.entrySet()) {
+        for (Map.Entry<String, Library> entry : config.entrySet()) {
             String name = entry.getKey();
+            Library lib = entry.getValue();
             name = name.replaceFirst("\\..*?$", "");
-            String root = entry.getValue().get("root");
-            if (root != null) {
-                Route route = router.attach(
-                    "/" + name + "/{path}", 
-                    new FileFinder(
-                        new File(configFile.getParent(), root.trim())
-                    )
-                );
+            if (lib.getRoot() != null) {
+                String filePath = String.format("/%s/{path}", name);
+                String loaderPath = String.format("/%s.js", name);
+                Route route = 
+                    router.attach(filePath, new FileFinder(lib.getRoot()));
                 route.getTemplate()
                     .getVariables()
                     .put("path", new Variable(Variable.TYPE_URI_PATH));
-                LibraryRestlet lib =
-                    new LibraryRestlet("/" + name, entry.getValue());
-                router.attach("/" + name + ".js", lib);
-                libraries.put(name + ".js", lib);
+                LibraryRestlet libRestlet =
+                    new LibraryRestlet("/" + name, lib);
+                router.attach(loaderPath, libRestlet);
+                libraries.put(name + ".js", libRestlet);
             }
         }
 
         router.attach("/", new Home(libraries));
         return router;
+    }
+
+    private static Library libraryFromConfig(
+        File base,
+        Map<String, String> conf
+    ) throws IOException {
+        String root = conf.get("root");
+        String license = conf.get("license");
+        String first = conf.get("first");
+        String include = conf.get("include");
+        String exclude = conf.get("exclude");
+        Library lib = new Library();
+
+        if (root != null) {
+            lib.setRoot(
+                new File(base, root.trim()).getCanonicalFile()
+            );
+        }
+
+        if (license != null) {
+            lib.setLicense(
+                new File(base, license.trim()).getCanonicalFile()
+            );
+        }
+
+        if (first != null) {
+            lib.getFirstFiles()
+                .addAll(Arrays.asList(first.trim().split("\\s+")));
+        }
+
+        if (include != null) {
+            lib.getIncludeFiles()
+                .addAll(Arrays.asList(include.trim().split("\\s+")));
+        }
+
+        if (exclude != null) {
+            lib.getExcludeFiles()
+                .addAll(Arrays.asList(exclude.trim().split("\\s+")));
+        }
+
+        return lib;
+    }
+
+    private static Map<String, Library> extractLibraries(File configFile) 
+    throws IOException {
+        Map<String, Map<String, String>> config = 
+            ConfigReader.parse(new BufferedReader(new FileReader(configFile)));
+        Map<String, Library> libs = new HashMap<String, Library>();
+        for (Map.Entry<String, Map<String, String>> entry : config.entrySet()) {
+            libs.put(
+                entry.getKey(),
+                libraryFromConfig(configFile.getParentFile(), entry.getValue())
+            );
+        }
+        return libs;
     }
 
     public static void main(String[] args) throws Exception {
