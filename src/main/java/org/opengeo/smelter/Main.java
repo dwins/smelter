@@ -11,8 +11,8 @@ import org.restlet.Application;
 import org.restlet.Component;
 import org.restlet.Restlet;
 import org.restlet.data.Protocol;
-import org.restlet.routing.Route;
 import org.restlet.routing.Router;
+import org.restlet.routing.TemplateRoute;
 import org.restlet.routing.Variable;
 import org.opengeo.smelter.config.ConfigReader;
 
@@ -38,7 +38,7 @@ public class Main extends Application {
             if (lib.getRoot() != null) {
                 String filePath = String.format("/%s/{path}", name);
                 String loaderPath = String.format("/%s.js", name);
-                Route route = 
+                TemplateRoute route = 
                     router.attach(filePath, new FileFinder(lib.getRoot()));
                 route.getTemplate()
                     .getVariables()
