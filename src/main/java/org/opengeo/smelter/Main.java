@@ -28,7 +28,6 @@ public class Main extends Application {
     @Override 
     public synchronized Restlet createInboundRoot() {
         Router router = new Router(getContext());
-        router.attach("/home", Home.class);
         Map<String, LibraryRestlet> libraries =
             new HashMap<String, LibraryRestlet>();
 

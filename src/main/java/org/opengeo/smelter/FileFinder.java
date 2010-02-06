@@ -11,11 +11,6 @@ public class FileFinder extends Finder {
     private File base;
 
     public FileFinder(File base) {
-        try {
-            System.out.println("Setting up file finder: " + base.getCanonicalPath());
-        } catch (Exception e) {
-            // don't recover??
-        }
         this.base = base;
     }
 
