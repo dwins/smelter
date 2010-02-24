@@ -78,7 +78,7 @@ public class LibraryRestlet extends Finder {
 
         private Representation getConcatenated() {
             try {
-                final InputStream sources = getConcatenatedSources();
+                final InputStream sources = library.getConcatenatedSources();
 
                 return new StreamRepresentation(MediaType.TEXT_JAVASCRIPT) {
                     @Override public void write(OutputStream out)
@@ -98,7 +98,7 @@ public class LibraryRestlet extends Finder {
 
         private Representation getMinified() {
             try {
-                final InputStream sources = getConcatenatedSources();
+                final InputStream sources = library.getConcatenatedSources();
 
                 return new StreamRepresentation(MediaType.TEXT_JAVASCRIPT) {
                     @Override public void write(OutputStream out)
@@ -143,30 +143,6 @@ public class LibraryRestlet extends Finder {
                 MediaType.TEXT_JAVASCRIPT
             );
         }
-    }
-
-    private InputStream getConcatenatedSources() throws IOException {
-        final Iterator<String> includes = library.getSortedPaths().iterator();
-        final Enumeration<InputStream> includeStreams =
-            new Enumeration<InputStream>() {
-                public boolean hasMoreElements() {
-                    return includes.hasNext();
-                }
-
-                public InputStream nextElement() {
-                    try {
-                        return new FileInputStream(
-                            new File(
-                                library.getRoot(),
-                                includes.next()
-                            )
-                        );
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
-                }
-            };
-        return new SequenceInputStream(includeStreams);
     }
 
     private static void copyStream(InputStream in, OutputStream out)

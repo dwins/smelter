@@ -2,8 +2,11 @@ package org.opengeo.smelter;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -15,6 +18,7 @@ import org.restlet.routing.Router;
 import org.restlet.routing.TemplateRoute;
 import org.restlet.routing.Variable;
 import org.opengeo.smelter.config.ConfigReader;
+import org.opengeo.smelter.util.JSMin;
 
 public class Main extends Application {
     private File configFile;
@@ -110,9 +114,38 @@ public class Main extends Application {
     }
 
     public static void main(String[] args) throws Exception {
+        if (args.length == 0) {
+            System.out.println(
+                "Usage: \n" +
+                "smelter serve <file>: \n" +
+                "    Host JavaScript libraries described by " + 
+                "a build configuration file \n" +
+                "smelter build <file>: \n" +
+                "    Write out concatenated/minified libraries to disk"
+            );
+        } else if (args[0].equals("serve")) {
+            host(args[1]);
+        } else if (args[0].equals("build")) {
+            build(args[1]);
+        } else {
+            host(args[0]);
+        }
+    }
+
+    public static void build(String path) throws Exception {
+        Map<String, Library> libs = extractLibraries(new File(path));
+        for (Map.Entry<String, Library> entry : libs.entrySet()) {
+            OutputStream out = new FileOutputStream(entry.getKey());
+            InputStream sources = entry.getValue().getConcatenatedSources();
+            new JSMin(sources, out).jsmin();
+            out.close();
+        }
+    }
+
+    public static void host(String path) throws Exception {
         Component component = new Component();
         component.getServers().add(Protocol.HTTP, 8080);
-        component.getDefaultHost().attach(new Main(new File(args[0])));
+        component.getDefaultHost().attach(new Main(new File(path)));
         component.start();
     }
 }

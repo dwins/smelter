@@ -8,7 +8,7 @@ $ mvn compile
 
 You can also use Maven to run it.  This is the preferred mechanism until we start providing binary distributions:
 
-$ mvn exec:java -Dexec.args="path/to/build.cfg"
+$ mvn exec:java -Dexec.args="serve path/to/build.cfg"
 
 Use ctrl-C to stop the server.
 

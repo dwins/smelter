@@ -2,12 +2,18 @@ package org.opengeo.smelter;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.SequenceInputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -70,6 +76,30 @@ public class Library {
         }
 
         return toInclude;
+    }
+
+    public InputStream getConcatenatedSources() throws IOException {
+        final Iterator<String> includes = getSortedPaths().iterator();
+        final Enumeration<InputStream> includeStreams =
+            new Enumeration<InputStream>() {
+                public boolean hasMoreElements() {
+                    return includes.hasNext();
+                }
+
+                public InputStream nextElement() {
+                    try {
+                        return new FileInputStream(
+                            new File(
+                                getRoot(),
+                                includes.next()
+                            )
+                        );
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            };
+        return new SequenceInputStream(includeStreams);
     }
 
     private List<File> expandPaths(List<String> paths) {
