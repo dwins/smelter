@@ -48,6 +48,8 @@ public class Home extends Finder {
                         LibraryRestlet lib = resourceStates.get(p.getName());
                         if (mode.equals("minified")) {
                             lib.setMode(LibraryRestlet.Mode.Minified);
+                        } else if (mode.equals("concatenated")) {
+                            lib.setMode(LibraryRestlet.Mode.Concatenated);
                         } else if (mode.equals("loader")) {
                             lib.setMode(LibraryRestlet.Mode.Loader);
                         }
@@ -65,6 +67,8 @@ public class Home extends Finder {
                 String mode = "";
                 if (lib.getMode() == LibraryRestlet.Mode.Minified) {
                     mode = "minified";
+                } else if (lib.getMode() == LibraryRestlet.Mode.Concatenated) {
+                    mode = "concatenated";
                 } else if (lib.getMode() == LibraryRestlet.Mode.Loader) {
                     mode = "loader";
                 }

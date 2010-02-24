@@ -12,6 +12,7 @@
         <form name="command"> <#list libraries?keys as lib>
             <label for="${lib}"><a href="/${lib}">${lib}</a></label>
             <input type="radio" name="${lib}" <#if libraries[lib] == "minified">checked="checked"</#if> value="minified"/> Minified
+            <input type="radio" name="${lib}" <#if libraries[lib] == "concatenated">checked="checked"</#if> value="concatenated"/> Concatenated
             <input type="radio" name="${lib}" <#if libraries[lib] == "loader">checked="checked"</#if> value="loader"/> Loader <br/> </#list>
             <input type="submit" value="Update"/>
         </form>
