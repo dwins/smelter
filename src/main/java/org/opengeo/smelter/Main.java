@@ -9,6 +9,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.restlet.Application;
 import org.restlet.Component;
@@ -127,6 +128,8 @@ public class Main extends Application {
             host(args[1]);
         } else if (args[0].equals("build")) {
             build(args[1]);
+        } else if (args[0].equals("list")) {
+            list(args[1]);
         } else {
             host(args[0]);
         }
@@ -139,6 +142,21 @@ public class Main extends Application {
             InputStream sources = entry.getValue().getConcatenatedSources();
             new JSMin(sources, out).jsmin();
             out.close();
+        }
+    }
+
+    private static void list(String path) throws Exception {
+        Map<String, Library> libs = extractLibraries(new File(path));
+        for (Map.Entry<String, Library> entry : libs.entrySet()) {
+            String key = entry.getKey();
+            System.out.println("\n" + key);
+            char[] chars = new char[key.length()];
+            Arrays.fill(chars, '-');
+            System.out.println(String.valueOf(chars));
+            List<String> paths = entry.getValue().getSortedPaths();
+            for (String p : paths) {
+                System.out.println(p);
+            }
         }
     }
 
