@@ -79,6 +79,15 @@ public class Library {
         return toInclude;
     }
 
+    public List<String> getAllSourcePaths() throws IOException {
+        List<String> paths = new ArrayList<String>();
+        List<File> files = searchForSources(root);
+        for (File file : files) {
+            paths.add(relativePath(file));
+        }
+        return paths;
+    }
+
     public InputStream getConcatenatedSources() throws IOException {
         final Iterator<String> includes = getSortedPaths().iterator();
         final Enumeration<InputStream> includeStreams =

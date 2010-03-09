@@ -90,6 +90,8 @@ public class Main extends Application {
         if (include != null && include.trim().length() > 0) {
             lib.getIncludeFiles()
                 .addAll(Arrays.asList(include.trim().split("\\s+")));
+        } else {
+            lib.getIncludeFiles().addAll(lib.getAllSourcePaths());
         }
 
         if (exclude != null && exclude.trim().length() > 0) {
