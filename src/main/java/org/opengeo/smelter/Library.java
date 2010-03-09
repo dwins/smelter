@@ -48,7 +48,7 @@ public class Library {
     }
 
     public List<String> getIncludeFiles() {
-        return this.first;
+        return this.include;
     }
 
     public List<String> getExcludeFiles() {
