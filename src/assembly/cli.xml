@@ -1,0 +1,17 @@
+<assembly>
+  <id>cli</id>
+  <formats>
+    <format>zip</format>
+  </formats>
+  <includeBaseDirectory>true</includeBaseDirectory>
+  <fileSets>
+    <fileSet>
+      <useDefaultExcludes>false</useDefaultExcludes>
+      <directory>${project.build.directory}/appassembler/</directory>
+      <outputDirectory>/</outputDirectory>
+      <includes>
+        <include>**/*</include>
+      </includes>
+    </fileSet>
+  </fileSets>
+</assembly>
