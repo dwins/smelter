@@ -152,9 +152,8 @@ public class Main extends Application {
         for (Map.Entry<String, Library> entry : libs.entrySet()) {
             String key = entry.getKey();
             System.out.println("\n" + key);
-            char[] chars = new char[key.length()];
-            Arrays.fill(chars, '-');
-            System.out.println(String.valueOf(chars));
+            String separator = key.replaceAll(".", "-");
+            System.out.println(separator);
             List<String> paths = entry.getValue().getSortedPaths();
             for (String p : paths) {
                 System.out.println(p);
