@@ -124,7 +124,7 @@ public class Main extends Application {
                 "    Host JavaScript libraries described by " + 
                 "a build configuration file \n" +
                 "smelter build <file>: \n" +
-                "    Write out concatenated/minified libraries to disk"
+                "    Write out concatenated/minified libraries to disk" +
                 "smelter list <file>: \n" +
                 "    Print out file inclusion order for a sanity check"
             );
