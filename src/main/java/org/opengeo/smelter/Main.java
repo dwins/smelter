@@ -125,6 +125,8 @@ public class Main extends Application {
                 "a build configuration file \n" +
                 "smelter build <file>: \n" +
                 "    Write out concatenated/minified libraries to disk"
+                "smelter list <file>: \n" +
+                "    Print out file inclusion order for a sanity check"
             );
         } else if (args[0].equals("serve")) {
             host(args[1]);
