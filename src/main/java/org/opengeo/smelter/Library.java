@@ -2,6 +2,7 @@ package org.opengeo.smelter;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
@@ -48,7 +49,7 @@ public class Library {
     }
 
     public List<String> getIncludeFiles() {
-        return this.first;
+        return this.include;
     }
 
     public List<String> getExcludeFiles() {
@@ -76,6 +77,15 @@ public class Library {
         }
 
         return toInclude;
+    }
+
+    public List<String> getAllSourcePaths() throws IOException {
+        List<String> paths = new ArrayList<String>();
+        List<File> files = searchForSources(root);
+        for (File file : files) {
+            paths.add(relativePath(file));
+        }
+        return paths;
     }
 
     public InputStream getConcatenatedSources() throws IOException {
@@ -150,7 +160,15 @@ public class Library {
     private List<File> searchForSources(File root) throws IOException {
         List<File> results = new ArrayList<File>();
 
-        for (File child : root.listFiles()) {
+        FileFilter jsFilter = new FileFilter() { 
+            public boolean accept(File file) {
+                boolean dir = file.isDirectory() && !file.getName().startsWith(".");
+                boolean js = file.isFile() && file.getName().endsWith(".js");
+                return dir || js;
+            } 
+        }; 
+        
+        for (File child : root.listFiles(jsFilter)) {
             if (child.isDirectory()) {
                 results.addAll(searchForSources(child));
             } else {
